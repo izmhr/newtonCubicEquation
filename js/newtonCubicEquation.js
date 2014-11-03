@@ -148,6 +148,12 @@ function calcAndDraw()
   var c = document.getElementById('c').valueAsNumber;
   var d = document.getElementById('d').valueAsNumber;
 
+  if(a == 0)
+  {
+    document.getElementById('result').textContent = 'x^3 の係数は0以外を指定して下さい'
+    return;
+  }
+
   var result = calc(a, b, c, d, s)
   draw(a, b, c, d, result.realAnsArray);
 
