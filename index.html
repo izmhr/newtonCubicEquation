@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title>三次方程式</title>
+  <meta charset="utf-8">
+
+  <script src="lib/easeljs-0.7.1.combined.js"></script>
+  <script src="js/drawGraph.js"></script>
+  <script src="js/newtonCubicEquation.js"></script>
+  <style>
+    *, html{
+      margin:0;
+      padding:0;
+    }
+    #graph{
+      background: #aaa;
+    }
+  </style>
+
+</head>
+<body>
+  <canvas id="graph" width="400" height="400"></canvas>
+  <div>
+    <div>
+      <button type="button" onClick="zoomX(false)" >x-</button>
+      <span id="scalex">scale x: 1</span>
+      <button type="button" onClick="zoomX(true)" >x+</button>
+    </div>
+    <div>
+      <button type="button" onClick="zoomY(false)" >y-</button>
+      <span id="scaley">scale y: 1</span>
+      <button type="button" onClick="zoomY(true)" >y+</button>
+    </div>
+  </div>
+  <div>
+    <input type="number" id="a" size="3" value=1>x^3 + 
+    <input type="number" id="b" size="3" value=-2>x^2 +
+    <input type="number" id="c" size="3" value=-5>x +
+    <input type="number" id="d" size="3" value=6>
+    <button type="button" name="calc" onClick="calcAndDraw()">calc</button>
+  </div>
+  <div id="result"></div>
+</body>
+</html>
