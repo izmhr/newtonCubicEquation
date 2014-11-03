@@ -7,36 +7,34 @@
   <script src="lib/easeljs-0.7.1.combined.js"></script>
   <script src="js/drawGraph.js"></script>
   <script src="js/newtonCubicEquation.js"></script>
-  <style>
-    *, html{
-      margin:0;
-      padding:0;
-    }
-    #graph{
-      background: #aaa;
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 
 </head>
 <body>
+  <h1>ニュートン法で三次方程式を解く</h1>
   <canvas id="graph" width="400" height="400"></canvas>
-  <div>
+  <div class="zoom">
     <div>
       <button type="button" onClick="zoomX(false)" >x-</button>
       <span id="scalex">scale x: 1</span>
       <button type="button" onClick="zoomX(true)" >x+</button>
     </div>
     <div>
-      <button type="button" onClick="zoomY(false)" >y-</button>
+      y軸はx軸の半分のスケールに設定されます
       <span id="scaley">scale y: 1</span>
-      <button type="button" onClick="zoomY(true)" >y+</button>
     </div>
   </div>
   <div>
-    <input type="number" id="a" size="3" value=1>x^3 + 
-    <input type="number" id="b" size="3" value=-2>x^2 +
-    <input type="number" id="c" size="3" value=-5>x +
-    <input type="number" id="d" size="3" value=6>
+    <span>sample</span>
+    <select name="funcs" id="presets">
+    </select>
+  </div>
+  <div class="inputs">
+    start x: <input type="number" step='0.1' id="s" value=0.2> | 
+    <input type="number" step='0.1' id="a" value=1>x^3 + 
+    <input type="number" step='0.1' id="b" value=-18>x^2 +
+    <input type="number" step='0.1' id="c" value=105>x +
+    <input type="number" step='0.1' id="d" value=-196>
     <button type="button" name="calc" onClick="calcAndDraw()">calc</button>
   </div>
   <div id="result"></div>

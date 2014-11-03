@@ -9,53 +9,46 @@ var THRESH = 0.00001;
 
 // そもそもどんな関数なのかは、grapher(Mac) など使って確認すると良いです
 
-// var a = 1;
-// var b = -18;
-// var c = 105;
-// var d = -196;
-
-// var a = 1;
-// var b = -4;
-// var c = -10;
-// var d = -12;
-
-// var a = 1;
-// var b = -2;
-// var c = -5;
-// var d = 6;
-
-// var a = 1;
-// var b = 2;
-// var c = 3;
-// var d = 0;
+var PRESETS = [
+  {a: 1, b:-18, c: 105, d: -196},
+  {a: 1, b: -4, c: -10, d:  -12},
+  {a: 1, b: -2, c:  -5, d:    6},
+  {a: 1, b:  2, c:   3, d:    0},
+  {a: 1, b:  7, c:  -5, d:  -75}
+];
 
 var mGraph = new graph();
 var result = "";
 
-var calc = function(a, b, c, d)
+var calc = function(a, b, c, d, s)
 {
 
-  console.log("solve cubic equation: " + a + 'x^3 + ' + b + 'x^2 + ' + c + 'x + ' + d + ' = 0;');
+  console.log("solve cubic equation: " + a + 'x^3 + ' + b + 'x^2 + ' + c + 'x + ' + d + ' = 0; start with x = ' + s);
 
   var starttime = (new Date()).getTime();
+
+  var realAns = [];
 
   // 0が解に含まれる場合
   // f(x) = ax(x^2 + (b/a)x + c/a) = 0 を解くことになる
   if(d == 0)
   {
+    s = 0;
     var D = b*b - 4*a*c;
     if(D > 0)
     {
       // 異なる解三つ
       var r1 = (-b + Math.sqrt(D)) / (2*a);
       var r2 = (-b - Math.sqrt(D)) / (2*a);
-      result = "result: " + 0 + ", " + r1 + ", " + r2; 
+      result = "result: " + 0 + ", " + r1 + ", " + r2;
+      realAns = [s, r1, r2];
     }
     else if(D == 0)
     {
       // 0と重解1組
       var r = -b / (2*a);
       result = "result: " + 0 + ", " + r + ", " + r;
+      realAns = [s, r];
     }
     else
     {
@@ -63,6 +56,7 @@ var calc = function(a, b, c, d)
       var r_real = -b / (2*a);
       var r_imag = Math.sqrt(-D) / (2*a);
       result = "result: " + 0 + ", " + r_real + "+" + r_imag + "i, " + r_real + "-" + r_imag + "i";
+      realAns = [s];
     }
   }
   else
@@ -76,8 +70,8 @@ var calc = function(a, b, c, d)
       // 極値になるようなsを指定させてはいけない。(ニュートン法が収束しない)
       if(3*a*s*s + 2*b*s + c == 0)
       {
-        // TODO 異なるsを指定させる処理をくわえる。
-        console.log("極値を見事に引き当てました");
+        console.log("極値を見事に引き当ててしまったので、ちょっとずらします");
+        s += 0.01;
         return 1;
       }
 
@@ -99,18 +93,27 @@ var calc = function(a, b, c, d)
     var A = (b + a*s) / a;
     var B = (c + b*s + a*s*s) / a;
 
-    if(D1 > 0 && D2 < 0)
+    if(D1 > 0 && D2 < 0)  // ★異なる実数解3つ
     {
-      // 異なる実数解3つ
       var r1 = (-A + Math.sqrt(A*A - 4*B)) / 2;
       var r2 = (-A - Math.sqrt(A*A - 4*B)) / 2;
       result = "result: " + s + ", " + r1 + ", " + r2;
+      realAns = [s, r1, r2];
     }
-    else if(D1 > 0 && D2 == 0)
+    else if(D1 > 0 && D2 == 0)  // ★異なる実数解2つ(重根あり)
     {
-      // 異なる実数解2つ(重根あり)
-      var r = -A / 2;
-      result = "result: " + s + ", " + r + ", " + r;
+      var r = -999999;
+      if( Math.abs(A*A - 4*B) < THRESH) // sが重解の一つではない場合
+      {
+        r = -A/2;
+        result = "result: " + s + ", " + r + ", " + r;
+      }
+      else  // sが重解の一つで、 fx = a(x-s)(x-s)(x-C) = 0 と分解できるとき
+      {
+        r = -d / (s*s*a); // = C;
+        result = "result: " + s + ", " + s + ", " + r;
+      }
+      realAns = [s, r];
     }
     else
     {
@@ -118,29 +121,37 @@ var calc = function(a, b, c, d)
       var r_real = -A / 2;
       var r_imag = Math.sqrt(-A*A + 4*B) / 2;
       result = "result: " + s + ", " + r_real + "+" + r_imag + "i, " + r_real + "-" + r_imag + "i";
+      realAns = [s];
     }
   }
 
+  console.log("result: " + result);
   console.log("past: " + ((new Date()).getTime() - starttime) + " ms" );
 
+  return {text: result, realAnsArray: realAns};
+};
+
+function draw(a, b, c, d, realAnsArray)
+{
   mGraph.setCubic(a, b, c, d);
   mGraph.zoomX(graphScaleX);
   mGraph.zoomY(graphScaleY);
   mGraph.drawCubic();
-
-  document.getElementById('result').textContent = result;
-
+  mGraph.drawAns(realAnsArray);
 };
 
 function calcAndDraw()
 {
-  console.log("calcAndDraw");
+  var s = document.getElementById('s').valueAsNumber;
   var a = document.getElementById('a').valueAsNumber;
   var b = document.getElementById('b').valueAsNumber;
   var c = document.getElementById('c').valueAsNumber;
   var d = document.getElementById('d').valueAsNumber;
 
-  calc(a, b, c, d)
+  var result = calc(a, b, c, d, s)
+  draw(a, b, c, d, result.realAnsArray);
+
+  document.getElementById('result').textContent = result.text;
 };
 
 var graphScaleX = 11;
@@ -149,26 +160,17 @@ var graphScaleY = 11;
 function zoomX(up)
 {
   if(up)
-    graphScaleX += 5;
+    graphScaleX += 1;
   else
-    graphScaleX -= 5;
-  if(graphScaleX <= 0)
-    graphScaleX = 1;
+    graphScaleX -= 1;
+  if(graphScaleX <= 1)
+    graphScaleX = 2;
 
-  mGraph.zoomX(graphScaleX);
+  graphScaleY = graphScaleX / 2;
+
+  calcAndDraw();
+
   document.getElementById('scalex').textContent = 'scale x: ' + graphScaleX;
-}
-
-function zoomY(up)
-{
-  if(up)
-    graphScaleY += 5;
-  else
-    graphScaleY -= 5;
-  if(graphScaleY <= 0)
-    graphScaleY = 1;
-
-  mGraph.zoomY(graphScaleY);
   document.getElementById('scaley').textContent = 'scale y: ' + graphScaleY;
 }
 
@@ -177,6 +179,24 @@ function init()
   document.getElementById('scalex').textContent = 'scale x: ' + graphScaleX;
   document.getElementById('scaley').textContent = 'scale y: ' + graphScaleY;
   mGraph.init();
+
+  // PRESETS FUNCS
+  var domSelect = document.getElementById('presets');
+  for(var i = 0; i < PRESETS.length; i++)
+  {
+    var domOption = document.createElement('option');
+    domOption.textContent = PRESETS[i].a + 'x^3 + ' + PRESETS[i].b + 'x^2 + ' + PRESETS[i].c + 'x + ' + PRESETS[i].d;
+    domOption.id = 'preset' + i;
+
+    domSelect.appendChild(domOption);
+  }
+  domSelect.onchange = function()
+  {
+    document.getElementById('a').value = PRESETS[domSelect.selectedIndex].a;
+    document.getElementById('b').value = PRESETS[domSelect.selectedIndex].b;
+    document.getElementById('c').value = PRESETS[domSelect.selectedIndex].c;
+    document.getElementById('d').value = PRESETS[domSelect.selectedIndex].d;
+  };
   calcAndDraw();
 };
 window.onload = init;

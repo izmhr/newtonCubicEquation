@@ -18,6 +18,9 @@ var graph = function()
   var line = new createjs.Shape();
   var xaxis = new createjs.Shape();
   var yaxis = new createjs.Shape();
+  var ansDots = []; // 3 Shapes;
+
+  var dotR = 3.0;
 
   var init = function()
   {
@@ -30,6 +33,14 @@ var graph = function()
     axisContainer.addChild(xaxis);
     axisContainer.addChild(yaxis);
     mainContainer.addChild(axisContainer);
+
+    for(var i = 0; i < 3; i++)
+    {
+      ansDot = new createjs.Shape();
+      ansDot.graphics.beginFill('#fff').drawCircle(0,0,dotR);
+      ansDots.push(ansDot);
+      mainContainer.addChild(ansDot);
+    }
 
     wDefault = stage.canvas.clientWidth;
     hDefault = stage.canvas.clientHeight;
@@ -60,6 +71,27 @@ var graph = function()
 
     stage.update();
   };
+
+  // 実数解を得られたときはグラフ上に打つ
+  var drawAns = function(realAnsArray)
+  {
+    // 一度すべてリセット
+    for(var i = 0; i < 3; i++)
+    {
+      var ansDot = ansDots[i];
+      ansDot.alpha = 0.0;
+      ansDot.x = -99999;
+    }
+
+    // 見つかった解だけ可視化する
+    for(var i = 0; i < realAnsArray.length; i++)
+    {
+      var ansDot = ansDots[i];
+      ansDot.alpha = 1.0;
+      ansDot.x = realAnsArray[i] * scaleX;
+    }
+    stage.update();
+  }
 
   var calcCubic = function(x)
   {
@@ -93,10 +125,6 @@ var graph = function()
     if(scaleX <= 0.0) scaleX = 0.0;
 
     w = wDefault * scaleX;
-
-    drawAxis();
-    drawCubic();
-    stage.update();
   };
 
   var zoomY = function(val)
@@ -105,17 +133,13 @@ var graph = function()
     if(scaleY <= 0.0) scaleY = 0.0;
 
     h = hDefault * scaleY;
-
-    drawAxis();
-    drawCubic();
-    stage.update();
   };
 
   return {
     init: init,
     drawCubic: drawCubic,
     setCubic: setCubic,
-    drawCubic: drawCubic,
+    drawAns: drawAns,
     zoomX: zoomX,
     zoomY: zoomY
   };
